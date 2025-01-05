@@ -116,8 +116,8 @@ export const ChatForm: React.FC<ChatFormProps> = ({
   isLoading,
   result,
   language,
-  maxLength = 45,
-  minLength = 20,
+  maxLength = 25,
+  minLength = 1,
 }) => {
   const [keywords, setKeywords] = React.useState<string>("");
   const [style, setStyle] = React.useState<string>(

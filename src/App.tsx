@@ -40,6 +40,8 @@ function App() {
           apiKey: "",
           provider: import.meta.env.VITE_DEFAULT_MODEL_PROVIDER || "google",
           model: import.meta.env.VITE_DEFAULT_MODEL || "gemini-pro",
+          maxLength: 25,
+          minLength: 1,
         };
   });
   const [result, setResult] = useState<string>("");

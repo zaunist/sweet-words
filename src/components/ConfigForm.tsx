@@ -144,7 +144,7 @@ const ConfigForm: React.FC<ConfigFormProps> = ({
   const [baseUrl, setBaseUrl] = React.useState(initialConfig?.baseUrl || "");
   const [apiKey, setApiKey] = React.useState(initialConfig?.apiKey || "");
   const [maxLength, setMaxLength] = React.useState(
-    initialConfig?.maxLength || 45
+    initialConfig?.maxLength || 25
   );
   const [minLength, setMinLength] = React.useState(
     initialConfig?.minLength || 20
@@ -347,7 +347,7 @@ const ConfigForm: React.FC<ConfigFormProps> = ({
             size={{ base: "sm", md: "md" }}
             type="number"
             min={minLength + 1}
-            max={500}
+            max={3000}
             value={maxLength}
             onChange={(e) => setMaxLength(Number(e.target.value))}
           />
