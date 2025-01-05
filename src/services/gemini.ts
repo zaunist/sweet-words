@@ -9,7 +9,9 @@ export class GeminiService {
     this.baseUrl = config.provider === 'custom'
       ? config.baseUrl || ""
       : import.meta.env.VITE_GOOGLE_BASE_URL;
-    this.apiKey = config.apiKey || import.meta.env.VITE_GOOGLE_API_KEY;
+    this.apiKey = config.provider === 'google' && !config.apiKey
+      ? import.meta.env.VITE_GOOGLE_API_KEY
+      : config.apiKey;
     this.model = config.model || "gemini-1.5-pro";
   }
 
