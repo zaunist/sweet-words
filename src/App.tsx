@@ -18,7 +18,6 @@ import {
   Link,
   Icon,
   HStack,
-  Image,
 } from "@chakra-ui/react";
 import { ConfigForm } from "./components/ConfigForm";
 import { ChatForm } from "./components/ChatForm";
