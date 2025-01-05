@@ -24,13 +24,13 @@ export interface ConfigFormProps {
 export const MODEL_OPTIONS: Record<ModelProvider, ModelOption[]> = {
   openai: [
     {
-      id: "gpt-4o-latest",
+      id: "gpt-4-turbo-preview",
       name: "GPT-4 Turbo (Latest)",
       provider: "openai",
       maxTokens: 128000,
     },
     {
-      id: "gpt-4o",
+      id: "gpt-4-turbo",
       name: "GPT-4 Turbo",
       provider: "openai",
       maxTokens: 128000,
@@ -153,7 +153,8 @@ const ConfigForm: React.FC<ConfigFormProps> = ({
     initialConfig?.provider || "google"
   );
   const [model, setModel] = React.useState(
-    initialConfig?.model || "gemini-1.5-pro"
+    initialConfig?.model ||
+      (provider === "custom" ? "gpt-4-turbo-preview" : "gemini-1.5-pro")
   );
   const toast = useToast();
   const [showApiKey, setShowApiKey] = React.useState(false);
@@ -171,7 +172,7 @@ const ConfigForm: React.FC<ConfigFormProps> = ({
       });
       return;
     }
-    if (!apiKey) {
+    if (!apiKey && provider !== "google") {
       toast({
         title: language === "zh" ? "错误" : "Error",
         description:
@@ -221,7 +222,11 @@ const ConfigForm: React.FC<ConfigFormProps> = ({
     if (newProvider !== "custom") {
       setBaseUrl("");
     }
-    setModel(MODEL_OPTIONS[newProvider][0].id);
+    setModel(
+      newProvider === "custom"
+        ? "gpt-4-turbo-preview"
+        : MODEL_OPTIONS[newProvider][0].id
+    );
   };
 
   const getDefaultBaseUrl = (provider: ModelProvider) => {
@@ -283,7 +288,7 @@ const ConfigForm: React.FC<ConfigFormProps> = ({
           </FormControl>
         )}
 
-        <FormControl isRequired>
+        <FormControl isRequired={provider !== "google"}>
           <FormLabel fontSize={{ base: "sm", md: "md" }}>API Key</FormLabel>
           <InputGroup size={{ base: "sm", md: "md" }}>
             <Input
@@ -291,6 +296,7 @@ const ConfigForm: React.FC<ConfigFormProps> = ({
               placeholder={`Enter your ${provider.toUpperCase()} API key`}
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
+              required={provider !== "google"}
             />
             <InputRightElement>
               <IconButton

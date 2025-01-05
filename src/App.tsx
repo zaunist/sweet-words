@@ -195,6 +195,8 @@ function App() {
               isLoading={isLoading}
               result={result}
               language={language}
+              maxLength={config.maxLength}
+              minLength={config.minLength}
             />
           </Box>
 
@@ -209,7 +211,7 @@ function App() {
               my={{ base: "auto", md: "3.75rem" }}
             >
               <ModalHeader fontSize={{ base: "lg", md: "xl" }}>
-                OpenAI 配置
+                {language === "zh" ? "模型配置" : "Model Configuration"}
               </ModalHeader>
               <ModalCloseButton />
               <ModalBody pb={6}>

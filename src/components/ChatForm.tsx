@@ -17,6 +17,8 @@ interface ChatFormProps {
   isLoading: boolean;
   result?: string;
   language: Language;
+  maxLength?: number;
+  minLength?: number;
 }
 
 interface StyleOption {
@@ -114,6 +116,8 @@ export const ChatForm: React.FC<ChatFormProps> = ({
   isLoading,
   result,
   language,
+  maxLength = 45,
+  minLength = 20,
 }) => {
   const [keywords, setKeywords] = React.useState<string>("");
   const [style, setStyle] = React.useState<string>(
@@ -157,8 +161,8 @@ export const ChatForm: React.FC<ChatFormProps> = ({
       scene,
       name,
       language,
-      maxLength: 45,
-      minLength: 20,
+      maxLength,
+      minLength,
     });
   };
 
