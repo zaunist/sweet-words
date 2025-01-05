@@ -1,4 +1,4 @@
-export type ModelProvider = 'openai' | 'anthropic' | 'google';
+export type ModelProvider = "openai" | "google" | "anthropic" | "custom";
 
 export interface ModelOption {
   id: string;
@@ -8,22 +8,24 @@ export interface ModelOption {
 }
 
 export interface ChatConfig {
-  baseUrl: string;
+  baseUrl?: string;
   apiKey: string;
-  maxLength: number;
-  minLength: number;
-  language: string;
-  model: string;
-  provider: ModelProvider;
+  provider?: ModelProvider;
+  model?: string;
+  maxLength?: number;
+  minLength?: number;
+  language?: Language;
 }
 
-export type Language = 'zh' | 'en';
+export type Language = "en" | "zh";
 
 export interface ChatInput {
   keywords: string[];
   style: string;
   scene: string;
   name: string;
+  maxLength: number;
+  minLength: number;
   language: Language;
 }
 

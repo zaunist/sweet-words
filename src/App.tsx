@@ -19,9 +19,11 @@ import {
   Icon,
   HStack,
 } from "@chakra-ui/react";
-import { ConfigForm } from "./components/ConfigForm";
+import { MODEL_OPTIONS } from "./components/ConfigForm";
+import ConfigForm from "./components/ConfigForm";
 import { ChatForm } from "./components/ChatForm";
 import { OpenAIService } from "./services/openai";
+import { GeminiService } from "./services/gemini";
 import { ChatConfig, ChatInput, Language } from "./types";
 import { SettingsIcon } from "@chakra-ui/icons";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
@@ -31,7 +33,14 @@ const CONFIG_KEY = "chat_generator_config";
 function App() {
   const [config, setConfig] = useState<ChatConfig>(() => {
     const saved = localStorage.getItem(CONFIG_KEY);
-    return saved ? JSON.parse(saved) : { baseUrl: "", apiKey: "" };
+    return saved
+      ? JSON.parse(saved)
+      : {
+          baseUrl: "https://generativelanguage.googleapis.com/v1beta",
+          apiKey: "",
+          provider: import.meta.env.VITE_DEFAULT_MODEL_PROVIDER || "google",
+          model: import.meta.env.VITE_DEFAULT_MODEL || "gemini-pro",
+        };
   });
   const [result, setResult] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -50,15 +59,36 @@ function App() {
   };
 
   const handleSubmit = async (input: ChatInput) => {
-    if (!config.baseUrl || !config.apiKey) {
+    if (!config.baseUrl || (!config.apiKey && config.provider !== "google")) {
       onOpen();
       return;
     }
 
     setIsLoading(true);
     try {
-      const openAIService = new OpenAIService(config);
-      const response = await openAIService.generateLoveMessage(input);
+      let service;
+      const provider = config.provider || "google";
+      const selectedModel = MODEL_OPTIONS[provider].find(
+        (m) => m.id === config.model
+      );
+      const modelProvider = selectedModel?.provider || provider;
+
+      switch (modelProvider) {
+        case "google":
+          service = new GeminiService(config);
+          break;
+        case "openai":
+        case "custom":
+          service = new OpenAIService(config);
+          break;
+        case "anthropic":
+          service = new OpenAIService(config);
+          break;
+        default:
+          service = new OpenAIService(config);
+      }
+
+      const response = await service.generateLoveMessage(input);
 
       if (response.error) {
         throw new Error(response.error);
@@ -67,7 +97,11 @@ function App() {
       setResult(response.content);
     } catch (error) {
       console.error("Error generating message:", error);
-      setResult("生成失败，请检查配置并重试。");
+      setResult(
+        language === "zh"
+          ? "生成失败，请检查配置并重试。"
+          : "Generation failed. Please check your configuration and try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -202,6 +236,15 @@ function App() {
         borderTop="1px"
         borderColor="gray.200"
         textAlign="center"
+        zIndex={1}
+        sx={{
+          "@media screen and (min-height: 100vh)": {
+            position: "fixed",
+          },
+          "@media screen and (max-height: 100vh)": {
+            position: "relative",
+          },
+        }}
       >
         <Container maxW="container.md">
           <VStack spacing={2}>

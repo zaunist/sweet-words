@@ -8,16 +8,20 @@ import {
   Button,
   useToast,
   Select,
+  InputGroup,
+  InputRightElement,
+  IconButton,
 } from "@chakra-ui/react";
 import { ChatConfig, ModelProvider, ModelOption } from "../types";
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 
-interface ConfigFormProps {
+export interface ConfigFormProps {
   onSave: (config: ChatConfig) => void;
   initialConfig?: ChatConfig;
   language?: "en" | "zh";
 }
 
-const MODEL_OPTIONS: Record<ModelProvider, ModelOption[]> = {
+export const MODEL_OPTIONS: Record<ModelProvider, ModelOption[]> = {
   openai: [
     {
       id: "gpt-4o-latest",
@@ -122,9 +126,17 @@ const MODEL_OPTIONS: Record<ModelProvider, ModelOption[]> = {
     },
     { id: "palm-2", name: "PaLM 2", provider: "google", maxTokens: 8192 },
   ],
+  custom: [
+    {
+      id: "custom-model",
+      name: "Custom Model",
+      provider: "custom",
+      maxTokens: 32768,
+    },
+  ],
 };
 
-export const ConfigForm: React.FC<ConfigFormProps> = ({
+const ConfigForm: React.FC<ConfigFormProps> = ({
   onSave,
   initialConfig,
   language = "zh",
@@ -132,25 +144,38 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
   const [baseUrl, setBaseUrl] = React.useState(initialConfig?.baseUrl || "");
   const [apiKey, setApiKey] = React.useState(initialConfig?.apiKey || "");
   const [maxLength, setMaxLength] = React.useState(
-    initialConfig?.maxLength || 150
+    initialConfig?.maxLength || 45
   );
   const [minLength, setMinLength] = React.useState(
-    initialConfig?.minLength || 50
+    initialConfig?.minLength || 20
   );
   const [provider, setProvider] = React.useState<ModelProvider>(
-    initialConfig?.provider || "openai"
+    initialConfig?.provider || "google"
   );
   const [model, setModel] = React.useState(
-    initialConfig?.model || "gpt-4o-latest"
+    initialConfig?.model || "gemini-1.5-pro"
   );
   const toast = useToast();
+  const [showApiKey, setShowApiKey] = React.useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!baseUrl || !apiKey) {
+    if (provider === "custom" && !baseUrl) {
       toast({
-        title: "Error",
-        description: "Please fill in all fields",
+        title: language === "zh" ? "错误" : "Error",
+        description:
+          language === "zh" ? "请填写所有必填项" : "Please fill in all fields",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+    if (!apiKey) {
+      toast({
+        title: language === "zh" ? "错误" : "Error",
+        description:
+          language === "zh" ? "请输入 API Key" : "Please enter your API Key",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -159,8 +184,11 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
     }
     if (minLength >= maxLength) {
       toast({
-        title: "Error",
-        description: "最小字数必须小于最大字数",
+        title: language === "zh" ? "错误" : "Error",
+        description:
+          language === "zh"
+            ? "最小字数必须小于最大字数"
+            : "Minimum length must be less than maximum length",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -168,7 +196,7 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
       return;
     }
     onSave({
-      baseUrl,
+      baseUrl: provider === "custom" ? baseUrl : getDefaultBaseUrl(provider),
       apiKey,
       maxLength,
       minLength,
@@ -190,7 +218,36 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
 
   const handleProviderChange = (newProvider: ModelProvider) => {
     setProvider(newProvider);
+    if (newProvider !== "custom") {
+      setBaseUrl("");
+    }
     setModel(MODEL_OPTIONS[newProvider][0].id);
+  };
+
+  const getDefaultBaseUrl = (provider: ModelProvider) => {
+    switch (provider) {
+      case "openai":
+      case "custom":
+        return import.meta.env.VITE_OPENAI_BASE_URL;
+      case "anthropic":
+        return import.meta.env.VITE_ANTHROPIC_BASE_URL;
+      case "google":
+        return import.meta.env.VITE_GOOGLE_BASE_URL;
+      default:
+        return import.meta.env.VITE_OPENAI_BASE_URL;
+    }
+  };
+
+  const getAvailableModels = (currentProvider: ModelProvider) => {
+    if (currentProvider === "custom") {
+      // 合并所有提供商的模型
+      return [
+        ...MODEL_OPTIONS.openai,
+        ...MODEL_OPTIONS.anthropic,
+        ...MODEL_OPTIONS.google,
+      ];
+    }
+    return MODEL_OPTIONS[currentProvider];
   };
 
   return (
@@ -205,10 +262,46 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
               handleProviderChange(e.target.value as ModelProvider)
             }
           >
+            <option value="google">Google (Gemini)</option>
             <option value="openai">OpenAI</option>
             <option value="anthropic">Anthropic (Claude)</option>
-            <option value="google">Google</option>
+            <option value="custom">自定义提供商</option>
           </Select>
+        </FormControl>
+
+        {provider === "custom" && (
+          <FormControl isRequired>
+            <FormLabel fontSize={{ base: "sm", md: "md" }}>
+              API Base URL
+            </FormLabel>
+            <Input
+              size={{ base: "sm", md: "md" }}
+              placeholder={import.meta.env.VITE_OPENAI_BASE_URL}
+              value={baseUrl}
+              onChange={(e) => setBaseUrl(e.target.value)}
+            />
+          </FormControl>
+        )}
+
+        <FormControl isRequired>
+          <FormLabel fontSize={{ base: "sm", md: "md" }}>API Key</FormLabel>
+          <InputGroup size={{ base: "sm", md: "md" }}>
+            <Input
+              type={showApiKey ? "text" : "password"}
+              placeholder={`Enter your ${provider.toUpperCase()} API key`}
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+            />
+            <InputRightElement>
+              <IconButton
+                aria-label={showApiKey ? "Hide API Key" : "Show API Key"}
+                icon={showApiKey ? <ViewOffIcon /> : <ViewIcon />}
+                onClick={() => setShowApiKey(!showApiKey)}
+                variant="ghost"
+                size="sm"
+              />
+            </InputRightElement>
+          </InputGroup>
         </FormControl>
 
         <FormControl isRequired>
@@ -218,41 +311,12 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
             value={model}
             onChange={(e) => setModel(e.target.value)}
           >
-            {MODEL_OPTIONS[provider].map((option) => (
+            {getAvailableModels(provider).map((option) => (
               <option key={option.id} value={option.id}>
-                {option.name}
+                {option.name} ({option.provider.toUpperCase()})
               </option>
             ))}
           </Select>
-        </FormControl>
-
-        <FormControl isRequired>
-          <FormLabel fontSize={{ base: "sm", md: "md" }}>
-            API Base URL
-          </FormLabel>
-          <Input
-            size={{ base: "sm", md: "md" }}
-            placeholder={
-              provider === "openai"
-                ? "https://api.openai.com"
-                : provider === "anthropic"
-                ? "https://api.anthropic.com"
-                : "https://generativelanguage.googleapis.com"
-            }
-            value={baseUrl}
-            onChange={(e) => setBaseUrl(e.target.value)}
-          />
-        </FormControl>
-
-        <FormControl isRequired>
-          <FormLabel fontSize={{ base: "sm", md: "md" }}>API Key</FormLabel>
-          <Input
-            size={{ base: "sm", md: "md" }}
-            type="password"
-            placeholder="Enter your API key"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-          />
         </FormControl>
 
         <FormControl>
@@ -295,3 +359,5 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
     </Box>
   );
 };
+
+export default ConfigForm;

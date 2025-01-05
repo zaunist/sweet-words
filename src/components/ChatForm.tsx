@@ -82,7 +82,7 @@ const TRANSLATIONS = {
     style: "风格",
     name: "对方的名字",
     namePlaceholder: "请输入名字",
-    generate: "生成情话",
+    generate: "生成甜言蜜语",
     result: "生成结果",
     copy: "复制",
     error: "错误",
@@ -157,6 +157,8 @@ export const ChatForm: React.FC<ChatFormProps> = ({
       scene,
       name,
       language,
+      maxLength: 45,
+      minLength: 20,
     });
   };
 
