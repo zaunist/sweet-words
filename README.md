@@ -1,14 +1,15 @@
-# Chat Generator (情话生成器)
+# 甜言蜜语生成器 (Sweet Words Generator)
 
-一个基于 React + Vite 的情话生成器，使用 OpenAI API 生成个性化的情话。
+一个基于 AI 的甜言蜜语生成器，支持多种语言和风格。
 
-## 功能特点
+## 特性
 
-- 支持输入关键词生成情话
-- 多种情话风格选择
-- 支持自定义 OpenAI API 配置
-- 响应式设计
-- 一键复制生成结果
+- 🌈 支持中英文双语界面
+- 🎨 多种风格选择
+- 🔧 可配置多个 AI 模型
+- 🎯 支持设置生成文本的长度范围
+- 💫 优雅的动画效果
+- 📱 响应式设计，支持移动端
 
 ## 技术栈
 
@@ -16,59 +17,44 @@
 - TypeScript
 - Vite
 - Chakra UI
-- Axios
 - OpenAI API
 
-## 本地开发
+## 开始使用
 
-1. 克隆项目：
-
-```bash
-git clone [repository-url]
-cd chat-generator
-```
-
-2. 安装依赖：
+1. 克隆项目
 
 ```bash
-npm install
+git clone https://github.com/zaunist/sweet-words.git
+cd sweet-words
 ```
 
-3. 启动开发服务器：
+2. 安装依赖
 
 ```bash
-npm run dev
+yarn install
 ```
 
-4. 在浏览器中打开 `http://localhost:5173`
+3. 启动开发服务器
 
-## 配置说明
+```bash
+yarn dev
+```
 
-首次使用时，需要配置 OpenAI API：
+4. 构建生产版本
 
-1. 点击右上角的设置图标
-2. 输入 OpenAI Base URL（默认为 https://api.openai.com）
-3. 输入你的 OpenAI API Key
+```bash
+yarn build
+```
 
-配置信息会保存在浏览器的 localStorage 中。
+## 配置
 
-## 部署
+使用前需要配置：
 
-项目可以轻松部署到 Vercel：
-
-1. Fork 本项目到你的 GitHub
-2. 在 Vercel 中导入项目
-3. 部署完成后即可使用
-
-## 使用说明
-
-1. 在关键词输入框中输入多个关键词（用逗号分隔）
-2. 选择想要的情话风格
-3. 输入对方的名字
-4. 点击"生成情话"按钮
-5. 等待生成结果
-6. 可以点击"复制"按钮复制生成的情话
+1. AI 服务提供商（OpenAI/Anthropic/Google）
+2. API Base URL
+3. API Key
+4. 选择合适的模型
 
 ## 许可证
 
-MIT
+[MIT License](LICENSE)
